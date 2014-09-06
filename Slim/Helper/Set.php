@@ -29,9 +29,25 @@
  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * ArrayAccess - 提供像访问数组一样访问对象的能力的接口。
+ * -----------------------------------------------
+ * ArrayAccess::offsetExists — 检查一个偏移位置是否存在
+ * ArrayAccess::offsetGet    — 获取一个偏移位置的值
+ * ArrayAccess::offsetSet    — 设置一个偏移位置的值
+ * ArrayAccess::offsetUnset  — 复位一个偏移位置的值
+ *
+ * Countable - 类实现 Countable 可被用于 count() 函数.
+ * -----------------------------------------------
+ * Countable::count — 统计一个对象的元素个数
+ *
+ * IteratorAggregate - 创建外部迭代器的接口
+ * -----------------------------------------------
+ * IteratorAggregate::getIterator — 获取一个外部迭代器
  */
 namespace Slim\Helper;
 
+/* A Container for IoC */
 class Set implements \ArrayAccess, \Countable, \IteratorAggregate
 {
     /**
@@ -82,9 +98,11 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate
      */
     public function get($key, $default = null)
     {
+        /* invoke 魔术方法可直接调用对象 $n = new testClass;$n(); */
         if ($this->has($key)) {
             $isInvokable = is_object($this->data[$this->normalizeKey($key)]) && method_exists($this->data[$this->normalizeKey($key)], '__invoke');
 
+            /* 可调用时传入 container 本身 */
             return $isInvokable ? $this->data[$this->normalizeKey($key)]($this) : $this->data[$this->normalizeKey($key)];
         }
 
@@ -219,6 +237,17 @@ class Set implements \ArrayAccess, \Countable, \IteratorAggregate
      * @param  Closure        The closure that defines the object
      * @return mixed
      */
+    /* Closure Example:
+        // Default request
+        $this->container->singleton('request', function ($c) {
+            return new \Slim\Http\Request($c['environment']);
+        });
+
+        // Default response
+        $this->container->singleton('response', function ($c) {
+            return new \Slim\Http\Response();
+        });
+    */
     public function singleton($key, $value)
     {
         $this->set($key, function ($c) use ($value) {

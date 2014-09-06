@@ -152,6 +152,10 @@ class Slim
     {
         // Setup IoC container
         $this->container = new \Slim\Helper\Set();
+
+        // 该 container 实现了 ArrayAccess(array),Countable(count),IteratorAggregate(foreach)
+        // static::something just like self::something
+        // static::getDefaultSettings() 默认配置数组，$userSettings 优先级更高
         $this->container['settings'] = array_merge(static::getDefaultSettings(), $userSettings);
 
         // Default environment
