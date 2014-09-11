@@ -1,4 +1,5 @@
 <?php
+// DONE
 /**
  * Slim - a micro PHP 5 framework
  *
@@ -93,10 +94,15 @@ class Headers extends \Slim\Helper\Set
      */
     protected function normalizeKey($key)
     {
+        // 小写
         $key = strtolower($key);
+        // - _ 替换为空格
         $key = str_replace(array('-', '_'), ' ', $key);
+        // 去掉 http 开头(如存在)
         $key = preg_replace('#^http #', '', $key);
+        // 首字母大写
         $key = ucwords($key);
+        // 用 - 拼接
         $key = str_replace(' ', '-', $key);
 
         return $key;

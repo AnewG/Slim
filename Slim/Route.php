@@ -1,4 +1,5 @@
 <?php
+// DONE
 /**
  * Slim - a micro PHP 5 framework
  *
@@ -162,6 +163,10 @@ class Route
     public function setCallable($callable)
     {
         $matches = array();
+        /*  
+            ! ^ ([^\:]+)\:([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*) $ !
+            ClassName:MethodName
+        */
         if (is_string($callable) && preg_match('!^([^\:]+)\:([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)$!', $callable, $matches)) {
             $class = $matches[1];
             $method = $matches[2];
@@ -368,10 +373,11 @@ class Route
     public function matches($resourceUri)
     {
         //Convert URL params into regex patterns, construct a regex for this route, init params
+        // :param1 :param2 ...
         $patternAsRegex = preg_replace_callback(
             '#:([\w]+)\+?#',
             array($this, 'matchesCallback'),
-            str_replace(')', ')?', (string)$this->pattern)
+            str_replace( ')', ')?', (string)$this->pattern )
         );
         if (substr($this->pattern, -1) === '/') {
             $patternAsRegex .= '?';
@@ -407,16 +413,24 @@ class Route
      */
     protected function matchesCallback($m)
     {
+        // keyword:环视
+        // (?!meta|img|br|hr|input\b) => 不能是 meta,img....
+        // (?<![/|/ ])                => '?<!',不能是自闭合的标签
+        // (?: .*)                    => '?:',分组但不捕获
+        // -------------------
+        // keyword:子组(子模式) 
+        // cat(arcat|erpillar|) match one of ”cat”， “cataract”， “caterpillar”
+        // (?P<name>pattern)  (?<name>pattern) (?’name’pattern) 这个子模式将会在匹配结果中同时以其名称和顺序(数字下标)出现
+        // 该子组不被单独捕获 (?i:saturday|sunday) or (?:(?i)saturday|sunday) -> case insensitive
         $this->paramNames[] = $m[1];
         if (isset($this->conditions[$m[1]])) {
             return '(?P<' . $m[1] . '>' . $this->conditions[$m[1]] . ')';
         }
+        // '/hello/:name+' match '/hello/Josh/T/Lockhart' -> array('Josh', 'T', Lockhart')
         if (substr($m[0], -1) === '+') {
             $this->paramNamesPath[$m[1]] = 1;
-
             return '(?P<' . $m[1] . '>.+)';
         }
-
         return '(?P<' . $m[1] . '>[^/]+)';
     }
 
@@ -456,6 +470,7 @@ class Route
     public function dispatch()
     {
         foreach ($this->middleware as $mw) {
+            // 把 $this 传入中间件
             call_user_func_array($mw, array($this));
         }
 

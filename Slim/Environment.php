@@ -1,4 +1,5 @@
 <?php
+// DONE
 /**
  * Slim - a micro PHP 5 framework
  *
@@ -88,20 +89,20 @@ class Environment implements \ArrayAccess, \IteratorAggregate
     public static function mock($userSettings = array())
     {
         $defaults = array(
-            'REQUEST_METHOD' => 'GET',
-            'SCRIPT_NAME' => '',
-            'PATH_INFO' => '',
-            'QUERY_STRING' => '',
-            'SERVER_NAME' => 'localhost',
-            'SERVER_PORT' => 80,
-            'ACCEPT' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'REQUEST_METHOD'  => 'GET',
+            'SCRIPT_NAME'     => '',
+            'PATH_INFO'       => '',
+            'QUERY_STRING'    => '',
+            'SERVER_NAME'     => 'localhost',
+            'SERVER_PORT'     => 80,
+            'ACCEPT'          => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'ACCEPT_LANGUAGE' => 'en-US,en;q=0.8',
-            'ACCEPT_CHARSET' => 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-            'USER_AGENT' => 'Slim Framework',
-            'REMOTE_ADDR' => '127.0.0.1',
+            'ACCEPT_CHARSET'  => 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+            'USER_AGENT'      => 'Slim Framework',
+            'REMOTE_ADDR'     => '127.0.0.1',
             'slim.url_scheme' => 'http',
-            'slim.input' => '',
-            'slim.errors' => @fopen('php://stderr', 'w')
+            'slim.input'      => '',
+            'slim.errors'     => @fopen('php://stderr', 'w')
         );
         self::$environment = new self(array_merge($defaults, $userSettings));
 
@@ -154,6 +155,7 @@ class Environment implements \ArrayAccess, \IteratorAggregate
             $env['SERVER_PORT'] = $_SERVER['SERVER_PORT'];
 
             //HTTP request headers (retains HTTP_ prefix to match $_SERVER)
+            //提取 Server 中的 Http-Header , X_ , HTTP_ ...
             $headers = \Slim\Http\Headers::extract($_SERVER);
             foreach ($headers as $key => $value) {
                 $env[$key] = $value;

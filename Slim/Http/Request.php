@@ -1,4 +1,5 @@
 <?php
+// DONE
 /**
  * Slim - a micro PHP 5 framework
  *
@@ -218,6 +219,12 @@ class Request
     {
         if (!isset($this->env['slim.request.query_hash'])) {
             $output = array();
+            /*  
+            mb_parse_str :
+              解析 GET/POST/COOKIE 数据并设置全局变量。 
+              由于 PHP 不提供原始 POST/COOKIE 数据，目前它仅能够用于 GET 数据。 
+              它解析了 URL 编码过的数据，检测其编码，并转换编码为内部编码，然后设置其值为 array 的 result 或者全局变量。
+            */
             if (function_exists('mb_parse_str') && !isset($this->env['slim.tests.ignore_multibyte'])) {
                 mb_parse_str($this->env['QUERY_STRING'], $output);
             } else {
@@ -326,19 +333,6 @@ class Request
         }
 
         return $this->cookies;
-        // if (!isset($this->env['slim.request.cookie_hash'])) {
-        //     $cookieHeader = isset($this->env['COOKIE']) ? $this->env['COOKIE'] : '';
-        //     $this->env['slim.request.cookie_hash'] = Util::parseCookieHeader($cookieHeader);
-        // }
-        // if ($key) {
-        //     if (isset($this->env['slim.request.cookie_hash'][$key])) {
-        //         return $this->env['slim.request.cookie_hash'][$key];
-        //     } else {
-        //         return null;
-        //     }
-        // } else {
-        //     return $this->env['slim.request.cookie_hash'];
-        // }
     }
 
     /**
@@ -369,25 +363,6 @@ class Request
         }
 
         return $this->headers;
-        // if ($key) {
-        //     $key = strtoupper($key);
-        //     $key = str_replace('-', '_', $key);
-        //     $key = preg_replace('@^HTTP_@', '', $key);
-        //     if (isset($this->env[$key])) {
-        //         return $this->env[$key];
-        //     } else {
-        //         return $default;
-        //     }
-        // } else {
-        //     $headers = array();
-        //     foreach ($this->env as $key => $value) {
-        //         if (strpos($key, 'slim.') !== 0) {
-        //             $headers[$key] = $value;
-        //         }
-        //     }
-        //
-        //     return $headers;
-        // }
     }
 
     /**
