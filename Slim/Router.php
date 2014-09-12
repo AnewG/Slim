@@ -1,4 +1,5 @@
 <?php
+// DONE
 /**
  * Slim - a micro PHP 5 framework
  *
@@ -142,6 +143,13 @@ class Router
      */
     protected function processGroups()
     {
+        // ??????
+        // $app->group('/api', function () use ($app) {
+        //     $app->group('/library', function () use ($app) {
+        //         $app->get('/books/:id', function ($id) {});
+        //         $app->get('/sucks/:id', function ($id) {});
+        //     });
+        // });
         $pattern = "";
         $middleware = array();
         foreach ($this->routeGroups as $group) {
@@ -188,11 +196,13 @@ class Router
         }
         $search = array();
         foreach ($params as $key => $value) {
+            // preg_quote — 转义正则表达式字符
             $search[] = '#:' . preg_quote($key, '#') . '\+?(?!\w)#';
         }
         $pattern = preg_replace($search, $params, $this->getNamedRoute($name)->getPattern());
 
-        //Remove remnants of unpopulated, trailing optional pattern segments, escaped special characters
+        // Remove remnants of unpopulated, trailing optional pattern segments, escaped special characters
+        // # \(/?:.+\) | \(|\) -> | | \\\\ -> \ #
         return preg_replace('#\(/?:.+\)|\(|\)|\\\\#', '', $pattern);
     }
 

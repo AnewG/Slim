@@ -1,4 +1,5 @@
 <?php
+// DONE
 /**
  * Slim - a micro PHP 5 framework
  *
@@ -87,6 +88,24 @@ class Flash extends \Slim\Middleware implements \ArrayAccess, \IteratorAggregate
     }
 
     /**
+     * Load messages from previous request if available
+     */
+    public function loadMessages()
+    {
+        if (isset($_SESSION[$this->settings['key']])) {
+            $this->messages['prev'] = $_SESSION[$this->settings['key']];
+        }
+    }
+
+    /**
+     * Save
+     */
+    public function save()
+    {
+        $_SESSION[$this->settings['key']] = $this->messages['next'];
+    }
+
+    /**
      * Now
      *
      * Specify a flash message for a given key to be shown for the current request
@@ -121,24 +140,6 @@ class Flash extends \Slim\Middleware implements \ArrayAccess, \IteratorAggregate
     {
         foreach ($this->messages['prev'] as $key => $val) {
             $this->messages['next'][$key] = $val;
-        }
-    }
-
-    /**
-     * Save
-     */
-    public function save()
-    {
-        $_SESSION[$this->settings['key']] = $this->messages['next'];
-    }
-
-    /**
-     * Load messages from previous request if available
-     */
-    public function loadMessages()
-    {
-        if (isset($_SESSION[$this->settings['key']])) {
-            $this->messages['prev'] = $_SESSION[$this->settings['key']];
         }
     }
 

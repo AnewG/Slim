@@ -1,4 +1,5 @@
 <?php
+// DONE
 /**
  * Slim - a micro PHP 5 framework
  *
@@ -69,12 +70,12 @@ class SessionCookie extends \Slim\Middleware
     public function __construct($settings = array())
     {
         $defaults = array(
-            'expires' => '20 minutes',
-            'path' => '/',
-            'domain' => null,
-            'secure' => false,
+            'expires'  => '20 minutes',
+            'path'     => '/',
+            'domain'   => null,
+            'secure'   => false,
             'httponly' => false,
-            'name' => 'slim_session',
+            'name'     => 'slim_session',
         );
         $this->settings = array_merge($defaults, $settings);
         if (is_string($this->settings['expires'])) {
@@ -89,8 +90,28 @@ class SessionCookie extends \Slim\Middleware
          * disable the session cookie and cache limiter. We also set the session
          * handler to this class instance to avoid PHP's native session file locking.
          */
+        // session.use_cookies 指定是否在客户端用 cookie 来存放会话 ID。默认为 1（启用）。
         ini_set('session.use_cookies', 0);
+        /* 读取/设置缓存限制器
+        public  
+          Expires：（根据 session.cache_expire 的设定计算得出）
+          Cache-Control： public, max-age=（根据 session.cache_expire 的设定计算得出）
+          Last-Modified：（会话最后保存时间）
+        private_no_expire   
+          Cache-Control: private, max-age=（根据 session.cache_expire 的设定计算得出）, pre-check=（根据 session.cache_expire 的设定计算得出）
+          Last-Modified: （会话最后保存时间）
+        private 
+          Expires: Thu, 19 Nov 1981 08:52:00 GMT
+          Cache-Control: private, max-age=（根据 session.cache_expire 的设定计算得出）, pre-check=（根据 session.cache_expire 的设定计算得出）
+          Last-Modified: （会话最后保存时间）
+        nocache 
+          Expires: Thu, 19 Nov 1981 08:52:00 GMT
+          Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+          Pragma: no-cache
+        */
         session_cache_limiter(false);
+
+        // 设置用户自定义会话存储函数
         session_set_save_handler(
             array($this, 'open'),
             array($this, 'close'),

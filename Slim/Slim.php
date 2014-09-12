@@ -1,4 +1,5 @@
 <?php
+// DONE
 /**
  * Slim - a micro PHP 5 framework
  *
@@ -233,6 +234,35 @@ class Slim
         }
     }
 
+    /********************************************************************************
+    * Middleware
+    *******************************************************************************/
+
+    /**
+     * Add middleware
+     *
+     * This method prepends new middleware to the application middleware stack.
+     * The argument must be an instance that subclasses Slim_Middleware.
+     *
+     * @param \Slim\Middleware
+     */
+    public function add(\Slim\Middleware $newMiddleware)
+    {
+        if(in_array($newMiddleware, $this->middleware)) {
+            $middleware_class = get_class($newMiddleware);
+            throw new \RuntimeException("Circular Middleware setup detected. Tried to queue the same Middleware instance ({$middleware_class}) twice.");
+        }
+        $newMiddleware->setApplication($this);
+        $newMiddleware->setNextMiddleware($this->middleware[0]);
+
+        // array_shift() 函数删除数组中的第一个元素，并返回被删除元素的值。
+        // array_unshift() 函数在数组开头插入一个或多个元素。
+
+        array_unshift($this->middleware, $newMiddleware);
+    }
+
+    /** Magic **/
+
     public function __get($name)
     {
         return $this->container[$name];
@@ -343,6 +373,7 @@ class Slim
 
         if (is_array($name)) {
             if (true === $value) {
+                // array_merge_recursive 与 array_merge 不同的是，当有重复的键名时，值不会被覆盖，而是将多个相同键名的值递归组成一个数组
                 $c['settings'] = array_merge_recursive($c['settings'], $name);
             } else {
                 $c['settings'] = array_merge($c['settings'], $name);
@@ -442,7 +473,7 @@ class Slim
      */
     protected function mapRoute($args)
     {
-        $pattern = array_shift($args);
+        $pattern  = array_shift($args);
         $callable = array_pop($args);
         $route = new \Slim\Route($pattern, $callable, $this->settings['routes.case_sensitive']);
         $this->router->map($route);
@@ -592,6 +623,7 @@ class Slim
      *
      * @param  mixed $callable Anything that returns true for is_callable()
      */
+
     public function notFound ($callable = null)
     {
         if (is_callable($callable)) {
@@ -1228,29 +1260,6 @@ class Slim
     }
 
     /********************************************************************************
-    * Middleware
-    *******************************************************************************/
-
-    /**
-     * Add middleware
-     *
-     * This method prepends new middleware to the application middleware stack.
-     * The argument must be an instance that subclasses Slim_Middleware.
-     *
-     * @param \Slim\Middleware
-     */
-    public function add(\Slim\Middleware $newMiddleware)
-    {
-        if(in_array($newMiddleware, $this->middleware)) {
-            $middleware_class = get_class($newMiddleware);
-            throw new \RuntimeException("Circular Middleware setup detected. Tried to queue the same Middleware instance ({$middleware_class}) twice.");
-        }
-        $newMiddleware->setApplication($this);
-        $newMiddleware->setNextMiddleware($this->middleware[0]);
-        array_unshift($this->middleware, $newMiddleware);
-    }
-
-    /********************************************************************************
     * Runner
     *******************************************************************************/
 
@@ -1263,6 +1272,7 @@ class Slim
      */
     public function run()
     {
+        // deal all error
         set_error_handler(array('\Slim\Slim', 'handleErrors'));
 
         //Apply final outer middleware layers
@@ -1305,6 +1315,7 @@ class Slim
 
         $this->applyHook('slim.after');
 
+        // 还原 set_error_handler 设置之前的错误处理函数
         restore_error_handler();
     }
 
@@ -1319,30 +1330,47 @@ class Slim
             if (isset($this->environment['slim.flash'])) {
                 $this->view()->setData('flash', $this->environment['slim.flash']);
             }
+
             $this->applyHook('slim.before');
+
             ob_start();
+
             $this->applyHook('slim.before.router');
+
             $dispatched = false;
+
             $matchedRoutes = $this->router->getMatchedRoutes($this->request->getMethod(), $this->request->getResourceUri());
+
             foreach ($matchedRoutes as $route) {
                 try {
+
                     $this->applyHook('slim.before.dispatch');
+
                     $dispatched = $route->dispatch();
+
                     $this->applyHook('slim.after.dispatch');
+
                     if ($dispatched) {
                         break;
                     }
+
                 } catch (\Slim\Exception\Pass $e) {
-                    continue;
+                    continue; // 有 pass 才继续路由
                 }
             }
+
             if (!$dispatched) {
                 $this->notFound();
             }
+
             $this->applyHook('slim.after.router');
-            $this->stop();
+
+            $this->stop(); // 手动触发 stop for $this->response()->write(ob_get_clean());
+
         } catch (\Slim\Exception\Stop $e) {
+
             $this->response()->write(ob_get_clean());
+
         } catch (\Exception $e) {
             if ($this->config('debug')) {
                 throw $e;
