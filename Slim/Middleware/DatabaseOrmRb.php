@@ -6010,7 +6010,16 @@ class OODB extends Observable
 		}
 	}
 
+    // fluid mode 会根据数据类型来改变表
+    // As you have seen in the previous chapters RedBeanPHP will keep changing the schema to fit your needs, this is called 'fluid mode'.
+    // While this is great for development, you don't want this to happen on your production server. 
+    // Learn how to freeze your database for deployment.
+
 	/**
+	 *
+	 * Note about auto-commits: 
+     * Many databases automatically commit after changing schemas, so make sure you test your transactions after R::freeze(true); !
+	 *
 	 * Toggles fluid or frozen mode. In fluid mode the database
 	 * structure is adjusted to accomodate your objects. In frozen mode
 	 * this is not the case.
