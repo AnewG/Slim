@@ -46,3 +46,41 @@ Slim group() called push group prefix
   |
   |__ pop top level group prefix(clear prefix for next call)
 ```
+
+# Client-Cache
+
+```
+
+    public function lastModified($time){
+        if (is_integer($time)) {
+            $this->response->headers->set('Last-Modified', gmdate('D, d M Y H:i:s T', $time));
+            if ($time === strtotime($this->request->headers->get('IF_MODIFIED_SINCE'))) {
+                $this->halt(304);
+            }
+        } else {
+            throw new \InvalidArgumentException('Slim::lastModified only accepts an integer UNIX timestamp value.');
+        }
+    }
+
+    public function etag($value, $type = 'strong'){
+        //Ensure type is correct
+        if (!in_array($type, array('strong', 'weak'))) {
+            throw new \InvalidArgumentException('Invalid Slim::etag type. Expected "strong" or "weak".');
+        }
+
+        //Set etag value
+        $value = '"' . $value . '"';
+        if ($type === 'weak') {
+            $value = 'W/'.$value;
+        }
+        $this->response['ETag'] = $value;
+
+        //Check conditional GET
+        if ($etagsHeader = $this->request->headers->get('IF_NONE_MATCH')) {
+            $etags = preg_split('@\s*,\s*@', $etagsHeader);
+            if (in_array($value, $etags) || in_array('*', $etags)) {
+                $this->halt(304);
+            }
+        }
+    }
+```
