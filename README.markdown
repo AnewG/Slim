@@ -1,3 +1,12 @@
+# Flash
+
+```
+init -> $msg['prev'] = $_SESSION;
+now  -> $msg['now'] // will display info on current request
+keep -> $msg['next'] = $msg['prev'];
+save -> $_SESSION = $msg['next']; // session info pass to next request
+```
+
 # Singleton
 
 ```
