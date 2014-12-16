@@ -1,3 +1,26 @@
+# Singleton
+
+```
+    public function singleton($key, $value){
+        $this->set($key, function ($c) use ($value) {
+            static $object;
+
+            if (null === $object) {
+                $object = $value($c);
+            }
+
+            return $object;
+        });
+    }
+    
+    $this->container->singleton('request', function ($c) {
+        return new \Slim\Http\Request($c['environment']); // Mark1
+    });   
+    
+    $call = $this->request;
+    $call($config_arr); // Mark1 called
+```
+
 # Router
 
 ```
